@@ -1,0 +1,37 @@
+{
+  "format_version": 1,
+  "sources_sha256": {
+    "production_model.keras": "73b3606d57438dc4de896040a3a984c29f19ae43dffdd91379c3a7370d20675d",
+    "preprocessing.pkl": "7102b9add26becd7afa8d98d269d881662f942c609228fedba040689c0e24f72",
+    "metadata.json": "9fb502835f4e8af2a8b92988699d6283cf6d381d99d04f9f9bd3ff61f1a8c41e"
+  },
+  "onnx_sha256": "189b57d9217867abbd8220509912986073676984ec52b9d4694cd7747de8e212",
+  "keras_version": "3.13.2",
+  "onnxruntime_version": "1.23.2",
+  "validation_windows": 137,
+  "random_seed": 20261007,
+  "maximum_absolute_error_mw": 2.789069071695849e-05,
+  "allowed_absolute_error_mw": 0.002,
+  "golden_cases": [
+    {
+      "end": "2026-06-10T23:00:00-05:00",
+      "expected_demand_mw": 614.1285660316258,
+      "onnx_demand_mw": 614.1285799769712
+    },
+    {
+      "end": "2026-10-07T23:00:00-05:00",
+      "expected_demand_mw": 609.4016852456978,
+      "onnx_demand_mw": 609.4016852456978
+    },
+    {
+      "end": "2026-01-01T10:00:00-05:00",
+      "expected_demand_mw": 597.6893690122115,
+      "onnx_demand_mw": 597.6893745903496
+    }
+  ],
+  "edge_cases": [
+    "zero_last_demand",
+    "price_810",
+    "wind_99"
+  ]
+}

@@ -4,10 +4,10 @@ import copy
 import csv
 import io
 import math
+import json
+from pathlib import Path
 from datetime import datetime
 
-import numpy as np
-import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
 
@@ -24,12 +24,9 @@ def payload():
     return example_payload(datetime.fromisoformat("2026-06-10T23:00:00-05:00"))
 
 
-def test_original_model_matches_direct_inference_and_inverse_scaling(payload):
-    predictor = get_predictor()
-    frame = pd.DataFrame(payload["observations"])[FEATURES]
-    tensor = predictor.feature_scaler.transform(frame).astype("float32")[None, :, :]
-    scaled_y = np.asarray(predictor.model(tensor, training=False))
-    expected = float(predictor.target_scaler.inverse_transform(scaled_y)[0, 0])
+def test_api_matches_verified_reference_from_original_keras_model(payload):
+    report = json.loads((Path(__file__).resolve().parents[1] / "model_conversion_report.json").read_text(encoding="utf-8"))
+    expected = report["golden_cases"][0]["expected_demand_mw"]
     response = client.post("/api/predict", json=payload)
     assert response.status_code == 200, response.text
     result = response.json()
@@ -41,7 +38,8 @@ def test_original_model_matches_direct_inference_and_inverse_scaling(payload):
     assert result["source"] == "demo"
     assert any("sintéticos" in item for item in result["warnings"])
     assert math.isfinite(result["predicted_demand_mw"])
-    assert expected != pytest.approx(float(scaled_y[0, 0]), abs=1)
+    assert get_predictor().engine == "onnxruntime"
+    assert report["maximum_absolute_error_mw"] <= report["allowed_absolute_error_mw"]
 
 
 def test_predictions_are_repeatable_and_json_key_order_does_not_change_features(payload):
@@ -156,8 +154,8 @@ def test_frontend_metadata_health_and_blank_template():
     assert list(full_rows[0]) == ["timestamp", *FEATURES]
     assert len(full_rows) == 24
     reference = client.get("/api/metadata").json()["price_training_reference"]
-    assert reference["mean"] == pytest.approx(get_predictor().feature_scaler.mean_[6])
-    assert reference["std"] == pytest.approx(get_predictor().feature_scaler.scale_[6])
+    assert reference["mean"] == pytest.approx(get_predictor().feature_mean[6])
+    assert reference["std"] == pytest.approx(get_predictor().feature_scale[6])
 
 
 def test_future_weather_alone_does_not_match_the_trained_model():

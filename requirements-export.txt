@@ -1,0 +1,9 @@
+# Herramientas para convertir/verificar el modelo; Vercel no instala este archivo.
+-r requirements.txt
+tensorflow-cpu==2.21.0
+keras==3.13.2
+h5py==3.14.0
+scikit-learn==1.6.1
+joblib==1.5.2
+pandas==2.3.3
+onnx==1.19.1

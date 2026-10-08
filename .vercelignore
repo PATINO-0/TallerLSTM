@@ -1,4 +1,4 @@
-.venv
+.venv*
 venv
 __pycache__
 .pytest_cache
@@ -11,3 +11,4 @@ scripts
 node_modules
 README.md
 requirements-dev.txt
+requirements-export.txt

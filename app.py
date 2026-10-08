@@ -44,7 +44,7 @@ def health() -> dict:
         predictor = get_predictor()
     except ModelUnavailable as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
-    return {"status": "ok", "model_ready": True, "model": predictor.metadata["model"], "input_shape": [1, 24, 16]}
+    return {"status": "ok", "model_ready": True, "model": predictor.metadata["model"], "engine": predictor.engine, "input_shape": [1, 24, 16]}
 
 
 @app.get("/api/metadata", tags=["Modelo"])

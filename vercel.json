@@ -4,7 +4,7 @@
   "functions": {
     "app.py": {
       "maxDuration": 120,
-      "excludeFiles": "{.venv/**,venv/**,tests/**,test-results/**,scripts/**,**/__pycache__/**,.pytest_cache/**,.ruff_cache/**,node_modules/**,.env,.env.*,README.md,requirements-dev.txt}"
+      "excludeFiles": "{.venv*/**,venv/**,tests/**,test-results/**,scripts/**,**/__pycache__/**,.pytest_cache/**,.ruff_cache/**,node_modules/**,.env,.env.*,README.md,requirements-dev.txt,requirements-export.txt}"
     }
   },
   "headers": [
