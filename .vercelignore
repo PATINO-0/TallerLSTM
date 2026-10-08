@@ -1,0 +1,13 @@
+.venv
+venv
+__pycache__
+.pytest_cache
+.ruff_cache
+tests
+test-results
+scripts
+.env
+.env.*
+node_modules
+README.md
+requirements-dev.txt

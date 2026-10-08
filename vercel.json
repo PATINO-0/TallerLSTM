@@ -1,0 +1,16 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "fastapi",
+  "functions": {
+    "app.py": {
+      "maxDuration": 120,
+      "excludeFiles": "{.venv/**,venv/**,tests/**,test-results/**,scripts/**,**/__pycache__/**,.pytest_cache/**,.ruff_cache/**,node_modules/**,.env,.env.*,README.md,requirements-dev.txt}"
+    }
+  },
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }]
+    }
+  ]
+}

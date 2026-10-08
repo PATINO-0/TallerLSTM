@@ -2,6 +2,8 @@
 
 Aplicación completa en español: backend FastAPI y frontend HTML/CSS/JavaScript, en un solo proyecto desplegable en Vercel. Utiliza **el modelo entrenado existente**, sin reentrenarlo ni modificar sus artefactos.
 
+La interfaz usa textos más grandes, colores de mayor contraste y un flujo de carga de historial → comprobación de la hora → predicción. La edición manual queda en un panel desplegable; cargar un CSV completo permite predecir directamente.
+
 El modelo predice la **demanda eléctrica de la siguiente hora, en MW**, a partir de **24 observaciones horarias consecutivas con 16 variables cada una**. Una fila aislada no es suficiente para este LSTM.
 
 ## Inicio local
@@ -283,6 +285,8 @@ Verificación visual opcional con Chrome instalado y el servidor iniciado:
 ```
 
 Usa un perfil de prueba independiente, comprueba escritorio y un viewport móvil de 390 px, y guarda capturas en `test-results/`.
+
+La verificación visual comprueba también la importación sencilla, el aviso de precio y el contraste de los textos visibles sobre fondos sólidos, con una referencia mínima de 4,5:1 según [W3C: contraste mínimo](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html). Esa comprobación concreta no equivale a una auditoría completa de accesibilidad.
 
 Las métricas existentes del modelo son MAE ≈ **23,04 MW**, RMSE ≈ **37,67 MW**, MAPE ≈ **4,17 %** y R² ≈ **0,81**. Provienen de `metadata.json`; no constituyen un intervalo de confianza de cada resultado ni una evaluación nueva sobre datos reales.
 #   T a l l e r L S T M  

@@ -1,0 +1,29 @@
+{
+    "problem": "Predicción de demanda eléctrica de la siguiente hora",
+    "model": "LSTM Base",
+    "window_hours": 24,
+    "validation_rmse": 31.246656071090232,
+    "test_mae": 23.04131317138672,
+    "test_mse": 1419.3875732421875,
+    "test_rmse": 37.67476042713726,
+    "test_mape": 4.174477577209473,
+    "test_r2": 0.8089091777801514,
+    "features": [
+        "demanda_mw",
+        "temperatura_c",
+        "humedad_pct",
+        "viento_kmh",
+        "radiacion_wm2",
+        "precipitacion_mm",
+        "precio_kwh",
+        "hora",
+        "dia_semana",
+        "fin_semana",
+        "festivo",
+        "mes",
+        "periodo_dia_madrugada",
+        "periodo_dia_manana",
+        "periodo_dia_tarde",
+        "periodo_dia_noche"
+    ]
+}

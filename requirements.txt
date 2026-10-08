@@ -1,0 +1,12 @@
+fastapi==0.121.2
+pydantic==2.11.10
+uvicorn==0.38.0
+numpy==2.2.6
+pandas==2.3.3
+scikit-learn==1.6.1
+joblib==1.5.2
+tensorflow-cpu==2.21.0
+keras==3.13.2
+h5py==3.14.0
+python-dotenv==1.2.1
+tzdata==2025.2

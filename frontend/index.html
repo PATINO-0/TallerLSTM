@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#123e38">
+  <meta name="description" content="Predice la demanda energética de la próxima hora con tu modelo LSTM y un historial de 24 horas.">
+  <title>Energy · Predicción de demanda</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/styles.css?v=2">
+  <script type="module" src="/assets/app.mjs?v=2"></script>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Ir a la predicción</a>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Energy, inicio"><span class="brand-mark">ϟ</span> energy<span class="brand-dot">.</span></a>
+    <span class="topbar-caption">INTELIGENCIA PARA TU ENERGÍA</span>
+    <button id="model-status" class="status" type="button" title="Volver a comprobar el modelo"><span class="status-dot"></span><span id="status-text">Conectando modelo…</span></button>
+  </header>
+  <main>
+    <section class="hero">
+      <div>
+        <div class="eyebrow"><span class="tiny-line"></span> PREDICCIÓN DE DEMANDA ENERGÉTICA</div>
+        <h1>Predice la demanda<br><span>de la próxima hora.</span></h1>
+        <p class="hero-description">Carga tus últimas 24 horas de mediciones y obtén una estimación en MW. El calendario se calcula a partir de las fechas de tu historial.</p>
+      </div>
+      <div class="model-summary" aria-label="Características del modelo">
+        <span class="model-icon" aria-hidden="true">ϟ</span>
+        <div><span class="small-label">MODELO DE PREDICCIÓN</span><strong id="model-name">LSTM Base</strong><span>Historial de 24 h → próxima hora</span></div>
+        <span class="model-tag">+1 h</span>
+      </div>
+    </section>
+
+    <div class="steps" aria-label="Cómo usar la aplicación">
+      <span><b>1</b> Carga tu historial</span><span class="step-line"></span>
+      <span><b>2</b> Comprueba la hora</span><span class="step-line"></span>
+      <span><b>3</b> Obtén la predicción</span>
+    </div>
+
+    <div id="page-message" class="message" role="alert" hidden></div>
+    <section id="workspace" class="workspace" aria-label="Datos y predicción">
+      <div class="input-panel card">
+        <div class="card-heading"><div><span class="small-label">PASO 1 · DATOS OBSERVADOS</span><h2>Carga tu historial</h2></div><span id="completion-badge" class="count-badge">0 / 24 horas</span></div>
+        <p class="subtle">Elige cómo empezar. Para probar la aplicación, usa el ejemplo.</p>
+        <div class="source-actions">
+          <button id="load-demo" class="button button-soft" type="button"><span aria-hidden="true">✧</span> Cargar ejemplo</button>
+          <label class="button button-outline import-button" for="csv-file"><span aria-hidden="true">↥</span> Importar mi CSV</label>
+          <input id="csv-file" class="visually-hidden" type="file" accept=".csv,text/csv">
+          <button id="manual-entry" class="button button-outline" type="button">Ingresar a mano</button>
+        </div>
+        <div class="template-row"><span>¿Tienes tus mediciones? Usa la plantilla sencilla.</span><a id="download-template" class="text-link" href="/api/template.csv" download>Descargar plantilla CSV ↓</a></div>
+        <div id="demo-notice" class="demo-notice" hidden>Datos sintéticos de ejemplo. Para una predicción operativa, ingresa mediciones reales.</div>
+
+        <div class="history-overview" aria-live="polite"><strong id="history-summary">Todavía no hay un historial completo.</strong><span id="history-range">Carga un CSV o usa el ejemplo para comenzar.</span></div>
+        <div class="prediction-time-box"><span class="small-label">PASO 2 · HORA QUE SE ESTIMARÁ</span><strong id="forecast-time">—</strong><p>Es la hora siguiente a la última medición de tu historial.</p></div>
+
+        <form id="hour-form" novalidate>
+        <details id="history-editor" class="history-editor">
+        <summary><span>Revisar o editar las mediciones</span><span class="hint">Edición por hora</span></summary>
+        <p class="editor-help">Ingresa valores <strong>observados</strong> en cada hora. El modelo también necesita la demanda histórica.</p>
+        <div class="date-row">
+          <label for="end-time">Última hora registrada <span class="hint">Hora de Colombia · UTC−5</span></label>
+          <input id="end-time" type="datetime-local" step="3600" required>
+        </div>
+        <div class="history-heading"><span>Selecciona una hora para editarla</span><span class="legend"><i></i> Completa</span></div>
+        <div id="hour-grid" class="hour-grid" role="group" aria-label="Las 24 horas del historial"></div>
+
+          <div class="editor-heading"><div><span id="selected-index" class="small-label">HORA 01 DE 24</span><h3 id="selected-time">—</h3></div><div class="hour-nav"><button id="previous-hour" type="button" aria-label="Hora anterior">←</button><button id="next-hour" type="button" aria-label="Hora siguiente">→</button></div></div>
+          <div class="field-grid">
+            <div class="field demand-field"><label for="demanda_mw">Demanda observada <span>MW</span></label><input id="demanda_mw" name="demanda_mw" type="number" min="0" step="any" placeholder="Ej. 650" required><small>Demanda de esta hora, antes de la predicción.</small></div>
+            <div class="field"><label for="temperatura_c">Temperatura <span>°C</span></label><input id="temperatura_c" name="temperatura_c" type="number" min="-100" max="100" step="any" placeholder="Ej. 19" required></div>
+            <div class="field"><label for="humedad_pct">Humedad <span>%</span></label><input id="humedad_pct" name="humedad_pct" type="number" min="0" max="100" step="any" placeholder="Ej. 78" required></div>
+            <div class="field"><label for="viento_kmh">Viento <span>km/h</span></label><input id="viento_kmh" name="viento_kmh" type="number" min="0" step="any" placeholder="Ej. 11" required></div>
+            <div class="field"><label for="radiacion_wm2">Radiación solar <span>W/m²</span></label><input id="radiacion_wm2" name="radiacion_wm2" type="number" min="0" step="any" placeholder="Ej. 82" required></div>
+            <div class="field"><label for="precipitacion_mm">Precipitación <span>mm</span></label><input id="precipitacion_mm" name="precipitacion_mm" type="number" min="0" step="any" placeholder="Ej. 1" required></div>
+            <div class="field"><label for="precio_kwh">Precio de energía <span>/ kWh</span></label><input id="precio_kwh" name="precio_kwh" type="number" step="any" placeholder="Ej. 25" required aria-describedby="price-help"><small id="price-help">Usa la unidad monetaria y la escala del entrenamiento.</small></div>
+            <div class="field"><label for="festivo">¿Es festivo?</label><select id="festivo" name="festivo"><option value="0">No</option><option value="1">Sí</option></select><small>Corresponde al día de la hora seleccionada.</small></div>
+          </div>
+          <div id="price-notice" class="inline-notice" role="status" hidden></div>
+          <details class="calendar-details">
+            <summary>Variables de calendario <span>Generadas a partir de la fecha</span></summary>
+            <div id="calendar-summary" class="calendar-chips"></div>
+            <label class="period-label" for="period">Período del día <select id="period"><option value="madrugada">Madrugada</option><option value="manana">Mañana</option><option value="tarde">Tarde</option><option value="noche">Noche</option></select></label>
+            <p class="hint">Por defecto: 00–05 madrugada, 06–11 mañana, 12–17 tarde y 18–23 noche. Verifica los cortes usados al entrenar; puedes cambiar el período de cada hora. Lunes = 0, domingo = 6.</p>
+          </details>
+          <div class="editor-actions"><button id="copy-next" class="text-button" type="button">Copiar valores a la siguiente hora →</button><button id="clear-data" class="text-button muted" type="button">Limpiar datos</button></div>
+          <button id="save-next" class="button button-outline continue-button" type="button">Guardar y continuar con la siguiente hora →</button>
+        </details>
+          <div class="progress-track"><span id="progress-fill"></span></div>
+          <div class="predict-heading"><span id="progress-text">Completa las 24 horas para continuar.</span><button id="predict-button" class="button button-primary" type="submit" disabled><span id="predict-label">Predecir demanda</span><span aria-hidden="true">↗</span></button></div>
+        </form>
+      </div>
+
+      <aside class="output-column" aria-label="Resultado del modelo">
+        <section class="prediction-card card">
+          <div class="prediction-top"><span class="small-label">PASO 3 · TU RESULTADO</span><span class="horizon-tag">PRÓXIMA HORA</span></div>
+          <h2>Demanda estimada</h2>
+          <div id="prediction-empty" class="prediction-empty"><span class="empty-symbol" aria-hidden="true">ϟ</span><strong>Tu estimación aparecerá aquí</strong><p>Carga el historial y pulsa<br>«Predecir demanda».</p></div>
+          <div id="prediction-result" hidden aria-live="polite">
+            <p id="prediction-for" class="prediction-for"></p>
+            <div class="result-value"><span id="predicted-value">—</span><span>MW</span></div>
+            <div class="result-comparison"><span id="change-value"></span><span>vs. última hora registrada</span></div>
+            <div class="result-details"><div><span>Última demanda</span><strong id="last-value"></strong></div><div><span>Tiempo de inferencia</span><strong id="inference-time"></strong></div></div>
+            <button id="download-result" type="button" class="text-button">Descargar resultado y entradas ↓</button>
+          </div>
+          <div id="prediction-warnings" class="prediction-warnings" hidden></div>
+          <div class="prediction-footer"><span class="live-dot"></span> Resultado del modelo entrenado</div>
+        </section>
+
+        <section class="chart-card card">
+          <div class="card-heading"><h2>La energía, en perspectiva</h2><span class="chart-unit">MW</span></div>
+          <div class="chart-legend"><span><i class="history-line"></i> Historial</span><span><i class="forecast-line"></i> Predicción</span></div>
+          <div id="demand-chart" class="demand-chart"><p>El gráfico aparecerá cuando ingreses la demanda de las 24 horas.</p></div>
+          <p class="chart-caption">24 horas observadas → 1 hora estimada</p>
+        </section>
+
+        <section class="about-card">
+          <div class="about-icon" aria-hidden="true">i</div><div><h3>¿Qué está calculando el modelo?</h3><p>Una red LSTM combina la demanda histórica, el clima, el precio y el calendario para estimar la demanda eléctrica de la siguiente hora.</p><details><summary>Ver evaluación del modelo</summary><dl class="metrics"><div><dt>Error absoluto medio</dt><dd id="metric-mae">—</dd></div><div><dt>RMSE de prueba</dt><dd id="metric-rmse">—</dd></div><div><dt>MAPE de prueba</dt><dd id="metric-mape">—</dd></div><div><dt>R² de prueba</dt><dd id="metric-r2">—</dd></div></dl><p class="hint">Métricas guardadas del conjunto de prueba. No son un intervalo de confianza para esta predicción.</p></details></div>
+        </section>
+        <details class="model-help card"><summary>¿Basta con ingresar el clima previsto?</summary><p>Este modelo necesita las últimas <strong>24 horas observadas</strong>, incluida su demanda eléctrica. Las variables de calendario se generan a partir de la fecha.</p><p>Para predecir solo con la hora futura y el clima previsto, se necesita un modelo entrenado con esas entradas. El precio debe conservar la unidad y escala originales.</p></details>
+      </aside>
+    </section>
+    <footer><span><strong>energy.</strong> Del dato a la decisión.</span><a href="/docs" target="_blank" rel="noopener">Documentación de la API ↗</a><span>LSTM · FastAPI · MW</span></footer>
+  </main>
+</body>
+</html>
